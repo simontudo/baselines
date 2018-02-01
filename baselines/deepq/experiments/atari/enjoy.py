@@ -3,7 +3,7 @@ import gym
 import os
 import numpy as np
 
-from gym.monitoring import VideoRecorder
+from gym.wrappers.monitoring.video_recorder import VideoRecorder
 
 import baselines.common.tf_util as U
 
@@ -45,17 +45,14 @@ def play(env, act, stochastic, video_path):
         env.unwrapped.render()
         video_recorder.capture_frame()
         action = act(np.array(obs)[None], stochastic=stochastic)[0]
-        obs, rew, done, info = env.step(action)
+        obs, rew, done, _ = env.step(action)
         if done:
             obs = env.reset()
-        if len(info["rewards"]) > num_episodes:
-            if len(info["rewards"]) == 1 and video_recorder.enabled:
+            if video_recorder.enabled:
                 # save video of first episode
                 print("Saved video.")
                 video_recorder.close()
                 video_recorder.enabled = False
-            print(info["rewards"][-1])
-            num_episodes = len(info["rewards"])
 
 
 if __name__ == '__main__':
