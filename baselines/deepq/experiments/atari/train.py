@@ -141,7 +141,8 @@ if __name__ == '__main__':
         # Create training graph and replay buffer
         def model_wrapper(img_in, num_actions, scope, **kwargs):
             actual_model = dueling_model if args.dueling else model
-            return actual_model(img_in, num_actions, scope, layer_norm=args.layer_norm, **kwargs)
+            #return actual_model(img_in, num_actions, scope, layer_norm=args.layer_norm, **kwargs)
+            return actual_model(img_in, num_actions, scope, **kwargs)
         act, train, update_target, debug = deepq.build_train(
             make_obs_ph=lambda name: Uint8Input(env.observation_space.shape, name=name),
             q_func=model_wrapper,
