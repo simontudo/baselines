@@ -5,6 +5,7 @@ import tensorflow as tf
 import zipfile
 import cloudpickle
 import numpy as np
+import time
 
 import gym
 import baselines
@@ -14,6 +15,14 @@ from baselines.common.schedules import LinearSchedule
 from baselines.deepq.build_graph import build_act, build_train
 from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 from baselines.deepq.utils import BatchInput, load_state, save_state
+from baselines.common.misc_util import (
+    boolean_flag,
+    pickle_load,
+    pretty_eta,
+    relatively_safe_pickle_dump,
+    set_global_seeds,
+    RunningAvg,
+)
 
 
 class ActWrapper(object):
@@ -220,6 +229,9 @@ def learn(env,
     with tempfile.TemporaryDirectory() as td:
         model_saved = False
         model_file = os.path.join(td, "model")
+        start_time, start_steps = None, None
+        steps_per_iter = RunningAvg(0.999)
+        iteration_time_est = RunningAvg(0.999)
         for t in range(max_timesteps):
             if callback is not None:
                 if callback(locals(), globals()):
@@ -270,6 +282,11 @@ def learn(env,
                 # Update target network periodically.
                 update_target()
 
+            if start_time is not None:
+                steps_per_iter.update(t - start_steps)
+                iteration_time_est.update(time.time() - start_time)
+            start_time, start_steps = time.time(), t
+
             mean_100ep_reward = round(np.mean(episode_rewards[-101:-1]), 1)
             num_episodes = len(episode_rewards)
             if done and print_freq is not None and len(episode_rewards) % print_freq == 0:
@@ -278,6 +295,12 @@ def learn(env,
                 logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
                 logger.record_tabular("% time spent exploring", int(100 * exploration.value(t)))
                 logger.dump_tabular()
+                fps_estimate = (float(steps_per_iter) / (float(iteration_time_est) + 1e-6)
+                                if steps_per_iter._value is not None else "calculating...")
+                logger.log()
+                steps_left = max_timesteps - t
+                logger.log("ETA: " + pretty_eta(int(steps_left / fps_estimate)))
+                logger.log()
 
             if (checkpoint_freq is not None and t > learning_starts and
                     num_episodes > 100 and t % checkpoint_freq == 0):
