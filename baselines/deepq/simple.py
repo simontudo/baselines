@@ -6,6 +6,7 @@ import zipfile
 import cloudpickle
 import numpy as np
 import time
+from datetime import datetime
 
 import gym
 import baselines
@@ -202,6 +203,10 @@ def learn(env,
 
     act = ActWrapper(act, act_params)
 
+    writer = tf.summary.FileWriter(
+        os.path.join("/home/shakenes/baselines/board",
+                     datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), sess.graph)
+
     # Create the replay buffer
     if prioritized_replay:
         replay_buffer = PrioritizedReplayBuffer(buffer_size, alpha=prioritized_replay_alpha)
@@ -274,6 +279,8 @@ def learn(env,
                     obses_t, actions, rewards, obses_tp1, dones = replay_buffer.sample(batch_size)
                     weights, batch_idxes = np.ones_like(rewards), None
                 td_errors = train(obses_t, actions, rewards, obses_tp1, dones, weights)
+                #summary, td_errors = sess.run(merged, feed_dict={obses_t, actions, rewards, obses_tp1, dones, weights})
+                #FileWriter.add_summary(summary, t)
                 if prioritized_replay:
                     new_priorities = np.abs(td_errors) + prioritized_replay_eps
                     replay_buffer.update_priorities(batch_idxes, new_priorities)
