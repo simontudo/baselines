@@ -16,11 +16,7 @@ from baselines.deepq.build_graph import build_act, build_train
 from baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 from baselines.deepq.utils import BatchInput, load_state, save_state
 from baselines.common.misc_util import (
-    boolean_flag,
-    pickle_load,
     pretty_eta,
-    relatively_safe_pickle_dump,
-    set_global_seeds,
     RunningAvg,
 )
 
