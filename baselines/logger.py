@@ -7,7 +7,7 @@ import time
 import datetime
 import tempfile
 
-LOG_OUTPUT_FORMATS = ['stdout', 'log', 'csv']
+LOG_OUTPUT_FORMATS = ['stdout', 'log', 'csv', 'tensorboard']
 # Also valid: json, tensorboard
 
 DEBUG = 10
@@ -311,7 +311,7 @@ def configure(dir=None, format_strs=None):
     if dir is None:
         dir = os.getenv('OPENAI_LOGDIR')
     if dir is None:
-        dir = osp.join(tempfile.gettempdir(),
+        dir = osp.join("/home/shakenes/tensorboard-logs",
             datetime.datetime.now().strftime("openai-%Y-%m-%d-%H-%M-%S-%f"))
     assert isinstance(dir, str)
     os.makedirs(dir, exist_ok=True)
