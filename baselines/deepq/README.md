@@ -50,3 +50,11 @@ python -m baselines.deepq.experiments.atari.download_model --blob model-atari-du
 python -m baselines.deepq.experiments.atari.enjoy --model-dir /tmp/models/model-atari-duel-pong-1 --env Pong --dueling
 
 ```
+
+## Training and enjoying a model
+
+```bash
+python3 run_atari.py
+python -m baselines.deepq.experiments.enjoy_breakout
+
+```
