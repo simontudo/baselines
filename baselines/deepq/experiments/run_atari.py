@@ -37,7 +37,7 @@ def main():
         gamma=0.99,
         prioritized_replay=bool(args.prioritized)
     )
-    # act.save("pong_model.pkl") XXX
+    act.save("breakout_model.pkl")
     env.close()
 
 
